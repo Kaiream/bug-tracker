@@ -1,9 +1,11 @@
 name: CI
 
-on: 
+on:
   push:
-    branches:
-      -main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
   workflow_dispatch:
 
 jobs:
@@ -40,3 +42,5 @@ jobs:
         run: |
           npm ci
           npm run test
+
+          
