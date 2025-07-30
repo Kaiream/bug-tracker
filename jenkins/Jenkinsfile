@@ -12,12 +12,26 @@ pipeline {
             }
             steps {
               dir('bugtracker-backend') {
-                sh 'go test -v ./... 2>&1 | go-junit-report > test-results.xml'
+                sh '''
+                  go test -v ./... 2>&1 | go-junit-report > test-results.xml
+
+                  # Generate code coverage report
+                  go test -coverprofile=coverage.out -covermode=atomic ./...
+                  go tool cover -html=coverage.out -o coverage.html
+
+                  mkdir -p reports
+                  mv coverage.html reports/coverage.html
+                '''
               }
             }
             post {
               always {
                 junit 'bugtracker-backend/test-results.xml'
+                publishHTML target: [
+                  reportDir: 'bugtracker-backend/reports',
+                  reportFiles: 'coverage.html',
+                  reportName: 'Backend Coverage Report',
+                ]
               }
             }
         }
@@ -34,12 +48,19 @@ pipeline {
                 sh '''
                   npm ci
                   npm test
+                  mkdir reports
+                  mv coverage reports/
                 '''
               }
             }
             post {
               always {
                 junit 'bugtracker-frontend/test-results.xml'
+                publishHTML target: [
+                  reportDir: 'bugtracker-frontend/reports/coverage',
+                  reportFiles: 'index.html',
+                  reportName: 'Frontend Coverage Report',
+                ]
               }
             }
         }
