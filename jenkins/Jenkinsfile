@@ -16,5 +16,22 @@ pipeline {
               }
             }
         }
+        stage('FE Unit Tests') {
+            agent {
+              docker {
+                image 'node:20-alpine'
+                reuseNode true
+                args '--user root'
+              }
+            }
+            steps {
+              dir('bugtracker-frontend') {
+                sh '''
+                  npm ci
+                  npm test
+                '''
+              }
+            }
+        }
     }
 }
